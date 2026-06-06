@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #00d4ff;
+  --color-secondary: #7c3aed;
+  --color-highlight: #10b981;
+  --color-bg: #0a0a0f;
+  --font-space: "Space Grotesk", sans-serif;
+  --font-syne: "Syne Mono", monospace;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-space);
+  background-color: var(--color-bg);
+  color: #e2e8f0;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+.section-wrapper {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 80px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.section-title {
+  text-align: center;
+  width: 100%;
+  margin-bottom: 60px;
+}
+
+.section-title h2 {
+  font-family: var(--font-syne);
+  color: #00d4ff;
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.section-title .divider {
+  width: 80px;
+  height: 2px;
+  margin: 0 auto;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #00d4ff, #7c3aed);
+}
+
+@media (max-width: 768px) {
+  .section-wrapper {
+    padding: 60px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-wrapper {
+    padding: 48px 12px;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0f;
+}
+::-webkit-scrollbar-thumb {
+  background: #00d4ff;
+  border-radius: 3px;
+}
+
+::selection {
+  background: #7c3aed;
+  color: #fff;
+}
