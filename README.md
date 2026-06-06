@@ -2,6 +2,8 @@
 
 An immersive, dark-themed 3D portfolio website built with React, Three.js, and Framer Motion. The site visualizes Abhishek's profile as an AI/ML engineer through interactive 3D scenes, neural network backgrounds, and scroll-driven animations.
 
+🔗 **Live demo** → [abhishek-portfolio-hqex.onrender.com](https://abhishek-portfolio-hqex.onrender.com/)
+
 ## Tech Stack
 
 | Layer | Technology |
