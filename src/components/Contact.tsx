@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
 import { useInView } from "react-intersection-observer"
 
@@ -9,17 +9,13 @@ const terminalLines = [
   "> STATUS: Open to Opportunities ✓",
 ]
 
-const links = [
-  { label: "Email Me", href: "mailto:meabhsk@gmail.com", icon: "✉" },
-  { label: "LinkedIn", href: "https://www.linkedin.com/in/abhishek-kumar-378039214/", icon: "🔗" },
-  { label: "GitHub", href: "https://github.com/meabhk", icon: "🐙" },
-  { label: "LeetCode", href: "https://leetcode.com/u/meabhk/", icon: "⚡" },
-]
-
 export default function Contact() {
   const [ref, inView] = useInView({ threshold: 0.2, triggerOnce: true })
   const [visibleLines, setVisibleLines] = useState(0)
   const [cursorVisible, setCursorVisible] = useState(true)
+  const [copied, setCopied] = useState(false)
+  const [formStatus, setFormStatus] = useState<"idle" | "sending" | "success" | "error">("idle")
+  const formRef = useRef<HTMLFormElement>(null)
 
   useEffect(() => {
     if (!inView) return
@@ -41,6 +37,36 @@ export default function Contact() {
     }, 530)
     return () => clearInterval(blink)
   }, [])
+
+  const handleEmailClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault()
+    try {
+      await navigator.clipboard.writeText("meabhsk@gmail.com")
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // clipboard not available
+    }
+    window.location.href = "mailto:meabhsk@gmail.com"
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setFormStatus("sending")
+
+    const form = e.target as HTMLFormElement
+    const data = new FormData(form)
+
+    try {
+      window.location.href = `mailto:meabhsk@gmail.com?subject=${encodeURIComponent(data.get("from_name") as string + " - " + (data.get("from_email") as string) || "Portfolio Inquiry")}&body=${encodeURIComponent(data.get("message") as string || "")}`
+      setFormStatus("success")
+      form.reset()
+      setTimeout(() => setFormStatus("idle"), 4000)
+    } catch {
+      setFormStatus("error")
+      setTimeout(() => setFormStatus("idle"), 4000)
+    }
+  }
 
   return (
     <section id="contact" ref={ref}>
@@ -97,35 +123,63 @@ export default function Contact() {
             </div>
 
             <div className="flex flex-wrap justify-center gap-3">
-              {links.map((link) => (
-                <motion.a
-                  key={link.label}
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-5 py-2.5 rounded-full text-sm font-medium flex items-center gap-2"
-                  style={{
-                    background: "rgba(0,212,255,0.05)",
-                    border: "1px solid rgba(0,212,255,0.2)",
-                    color: "#00d4ff",
-                  }}
-                  whileHover={{
-                    scale: 1.05,
-                    background: "rgba(0,212,255,0.1)",
-                    borderColor: "#00d4ff",
-                    boxShadow: "0 0 20px rgba(0,212,255,0.2)",
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <span>{link.icon}</span>
-                  {link.label}
-                </motion.a>
-              ))}
+              <a
+                href="mailto:meabhsk@gmail.com"
+                className="social-btn email-btn"
+                aria-label="Send email to Abhishek"
+                onClick={handleEmailClick}
+              >
+                <span className="social-icon">✉</span>
+                <span className="social-label">{copied ? "✓ Copied!" : "meabhsk@gmail.com"}</span>
+                <span className="social-arrow">↗</span>
+              </a>
+              <a
+                href="https://www.linkedin.com/in/abhishek-kumar-3b288a2b9/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="social-btn linkedin-btn"
+                aria-label="Visit Abhishek's LinkedIn Profile"
+              >
+                <span className="social-icon">🔗</span>
+                <span className="social-label">LinkedIn</span>
+                <span className="social-arrow">↗</span>
+              </a>
+              <a
+                href="https://github.com/abhsk-kr"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="social-btn github-btn"
+                aria-label="Visit Abhishek's GitHub Profile"
+              >
+                <span className="social-icon">🐙</span>
+                <span className="social-label">GitHub</span>
+                <span className="social-arrow">↗</span>
+              </a>
+              <a
+                href="https://leetcode.com/u/abhsk_kr/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="social-btn leetcode-btn"
+                aria-label="Visit Abhishek's LeetCode Profile"
+              >
+                <span className="social-icon">⚡</span>
+                <span className="social-label">LeetCode</span>
+                <span className="social-arrow">↗</span>
+              </a>
+              <a
+                href="tel:+919773582546"
+                className="social-btn phone-btn"
+                aria-label="Call Abhishek"
+              >
+                <span className="social-icon">📞</span>
+                <span className="social-label">+91 9773582546</span>
+                <span className="social-arrow">↗</span>
+              </a>
             </div>
           </motion.div>
 
           <motion.div
-            className="w-full max-w-[560px] mx-auto p-6 rounded-2xl"
+            className="w-full rounded-2xl p-6 md:p-8"
             style={{
               background: "rgba(255,255,255,0.02)",
               border: "1px solid rgba(255,255,255,0.05)",
@@ -134,60 +188,34 @@ export default function Contact() {
             animate={inView ? { opacity: 1 } : {}}
             transition={{ duration: 0.6, delay: 0.6 }}
           >
-            <p className="text-xs text-white/30 text-center font-mono mb-4">or send a message directly</p>
-            <form
-              className="flex flex-col gap-4"
-              onSubmit={(e) => {
-                e.preventDefault()
-                const form = e.target as HTMLFormElement
-                const data = new FormData(form)
-                window.location.href = `mailto:meabhsk@gmail.com?subject=${encodeURIComponent(data.get("subject") as string || "Portfolio Inquiry")}&body=${encodeURIComponent(data.get("message") as string || "")}`
-              }}
-            >
-              <input
-                name="subject"
-                placeholder="Subject"
-                className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
-                style={{
-                  background: "rgba(0,0,0,0.3)",
-                  border: "1px solid rgba(0,212,255,0.1)",
-                  color: "#e2e8f0",
-                  fontFamily: "var(--font-space)",
-                  boxSizing: "border-box",
-                }}
-                onFocus={(e) => (e.target.style.borderColor = "#00d4ff")}
-                onBlur={(e) => (e.target.style.borderColor = "rgba(0,212,255,0.1)")}
-              />
-              <textarea
-                name="message"
-                placeholder="Your message..."
-                rows={4}
-                className="w-full px-4 py-3 rounded-xl text-sm outline-none resize-none transition-colors"
-                style={{
-                  background: "rgba(0,0,0,0.3)",
-                  border: "1px solid rgba(0,212,255,0.1)",
-                  color: "#e2e8f0",
-                  fontFamily: "var(--font-space)",
-                  boxSizing: "border-box",
-                }}
-                onFocus={(e) => (e.target.style.borderColor = "#00d4ff")}
-                onBlur={(e) => (e.target.style.borderColor = "rgba(0,212,255,0.1)")}
-              />
-              <motion.button
-                type="submit"
-                className="px-6 py-3 rounded-xl text-sm font-semibold tracking-wider cursor-pointer"
-                style={{
-                  background: "linear-gradient(135deg, #00d4ff, #7c3aed)",
-                  color: "#fff",
-                  border: "none",
-                  alignSelf: "center",
-                  minWidth: "180px",
-                }}
-                whileHover={{ scale: 1.02, boxShadow: "0 0 30px rgba(0,212,255,0.3)" }}
-                whileTap={{ scale: 0.98 }}
-              >
-                Send Transmission
-              </motion.button>
+            <p className="text-xs text-white/30 text-center font-mono mb-6">or send a message directly</p>
+            <form ref={formRef} className="contact-form" onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label htmlFor="name">Name</label>
+                <input type="text" id="name" name="from_name" placeholder="Your name" required autoComplete="name" />
+              </div>
+              <div className="form-group">
+                <label htmlFor="email">Email</label>
+                <input type="email" id="email" name="from_email" placeholder="your@email.com" required autoComplete="email" />
+              </div>
+              <div className="form-group">
+                <label htmlFor="message">Message</label>
+                <textarea id="message" name="message" rows={5} placeholder="Tell me about your project or opportunity..." required />
+              </div>
+              <button type="submit" className="submit-btn" id="submit-btn" disabled={formStatus === "sending"}>
+                <span className="btn-text">{formStatus === "sending" ? "Sending..." : "Send Message"}</span>
+                <span className="btn-icon">→</span>
+              </button>
+              {formStatus === "success" && (
+                <div className="form-status success">
+                  ✅ Message sent! I'll get back to you within 24 hours.
+                </div>
+              )}
+              {formStatus === "error" && (
+                <div className="form-status error">
+                  ❌ Something went wrong. Please email me directly at meabhsk@gmail.com
+                </div>
+              )}
             </form>
           </motion.div>
 
