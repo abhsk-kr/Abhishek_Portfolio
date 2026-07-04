@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 
 const sections = ["Home", "About", "Skills", "Experience", "Projects", "Achievements", "Contact"]
@@ -6,11 +6,20 @@ const sections = ["Home", "About", "Skills", "Experience", "Projects", "Achievem
 export default function Navbar() {
   const [active, setActive] = useState("Home")
   const [scrolled, setScrolled] = useState(false)
+  const [visible, setVisible] = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
+  const lastScrollY = useRef(0)
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 50)
+      const currentY = window.scrollY
+      if (currentY > lastScrollY.current && currentY > 80) {
+        setVisible(false)
+      } else {
+        setVisible(true)
+      }
+      lastScrollY.current = currentY
+      setScrolled(currentY > 50)
       const sectionElements = sections.map((s) => document.getElementById(s.toLowerCase()))
       for (let i = sectionElements.length - 1; i >= 0; i--) {
         const el = sectionElements[i]
@@ -37,7 +46,7 @@ export default function Navbar() {
 
   return (
     <motion.nav
-      className="fixed top-4 left-1/2 z-40 px-6 py-3 rounded-2xl flex items-center justify-between max-w-3xl w-[calc(100%-2rem)]"
+      className="fixed top-4 left-1/2 z-40 px-6 py-3 rounded-2xl flex items-center justify-center max-w-3xl w-[calc(100%-2rem)]"
       style={{
         transform: "translateX(-50%)",
         background: scrolled ? "rgba(10, 10, 15, 0.8)" : "transparent",
@@ -46,23 +55,23 @@ export default function Navbar() {
         boxShadow: scrolled ? "0 8px 32px rgba(0,0,0,0.3)" : "none",
       }}
       initial={{ y: -80, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.8, delay: 2.2 }}
+      animate={{ y: visible ? 0 : -100, opacity: visible ? 1 : 0 }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
     >
       <span
-        className="text-lg font-bold tracking-wider cursor-pointer"
+        className="absolute left-6 text-lg font-bold tracking-wider cursor-pointer"
         style={{ color: "#00d4ff", fontFamily: "var(--font-syne)" }}
         onClick={() => scrollTo("home")}
       >
         AK<span style={{ color: "#7c3aed" }}>.</span>
       </span>
 
-      <div className="hidden md:flex items-center gap-1">
+      <div className="hidden md:flex items-center gap-1.5">
         {sections.map((s) => (
           <button
             key={s}
             onClick={() => scrollTo(s)}
-            className="relative px-3 py-1.5 text-sm rounded-lg transition-colors"
+            className="relative px-2 py-1.5 text-xs font-medium rounded-lg transition-colors"
             style={{
               color: active === s ? "#00d4ff" : "rgba(255,255,255,0.5)",
               fontFamily: "var(--font-space)",
@@ -82,7 +91,7 @@ export default function Navbar() {
       </div>
 
       <button
-        className="md:hidden relative w-6 h-5 flex flex-col justify-between"
+        className="md:hidden absolute right-6 w-6 h-5 flex flex-col justify-between"
         onClick={() => setMenuOpen(!menuOpen)}
       >
         <motion.span
